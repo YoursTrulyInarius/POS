@@ -3,7 +3,7 @@
 A feature-rich Point of Sale (POS) system designed for Sari-Sari stores, built with a fun One Piece theme ("Sonjeb Gwapo sakatanan"). This system helps manage inventory, process sales, and track revenue with a user-friendly interface.
 
 ## 👥 Developers
-*   **Cabardo**
+*   **Cabardo, Sonjeev C.**
 
 ## ✨ Features
 
