@@ -51,7 +51,7 @@ A feature-rich Point of Sale (POS) system designed for Sari-Sari stores, built w
 
 3.  **Run the Application:**
     *   Place the project folder in your `htdocs` directory.
-    *   Navigate to `http://localhost/assignment/index.php`.
+    *   Navigate to `http://localhost/POS/index.php`.
     *   Register a new account or login.
 
 ## 📝 Technologies Used
@@ -61,3 +61,4 @@ A feature-rich Point of Sale (POS) system designed for Sari-Sari stores, built w
 
 ## 📄 License
 This project is for educational/assignment purposes.
+Fueled by PURE HATRED & CAFFEINE.
