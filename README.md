@@ -1,76 +1,98 @@
 # King Slayer's Sari-Sari Store POS System
 
-A feature-rich Point of Sale (POS) system designed for Sari-Sari stores, built with a fun One Piece theme ("Sonjeb Gwapo sakatanan"). This system helps manage inventory, process sales, and track revenue with a user-friendly interface.
+A PHP and MySQL point-of-sale application for managing sari-sari store products, inventory, sales, and reports.
 
-## 👥 Developers
-*   **Cabardo, Sonjeev C.**
+## Features
 
-## ✨ Features
+### Accounts
 
-### 🔐 Authentication & Security
-*   **Secure Login:** Custom login page with a video background (`g5.mp4`).
-*   **Registration:** User registration with duplicate checks.
-*   **Role-Based Access:** Cashier tracking for every transaction.
+- Register an account with a unique username and email.
+- Sign in and out using a session.
+- Associate sales with the signed-in cashier.
 
-### 💰 Point of Sale (POS)
-*   **Dynamic Cart:** Real-time addition of products with automatic subtotal calculation.
-*   **Stock Validation:** Prevents selling more items than available in inventory.
-*   **Smart Payment System:**
-    *   Calculates change automatically.
-    *   Validates insufficient payment.
-*   **Theme Switcher:** Personalize the POS experience with multiple color themes (Blue, Red, Green, Purple, Orange).
+> **Security note:** The current login implementation stores and checks passwords as plain text. This project is for educational use and should not be deployed with real accounts or sensitive data until password hashing and other production security controls are added.
 
-### 📊 Dashboard & Analytics
-*   **Real-time Stats:**
-    *   Total Products count.
-    *   Daily Sales tracker.
-    *   Total Revenue accumulated.
-*   **Low Stock Alerts:** Automatic notification for products with stock levels at 5 or below.
-*   **Quick Navigation:** fast access to POS, Inventory, and Reports.
+### Point of Sale
 
-### 📦 Inventory & Management
-*   **Product Management:** Add, delete, and update product stocks.
-*   **Sales History:** View past transactions and download reports.
-*   **Stock Validation:** Stock entries must be whole numbers zero or greater.
+- Add products to a cart and calculate the sale total.
+- Validate cart quantities against available stock.
+- Record payments, calculate change, and save sales and sale items.
+- Reduce product stock when a sale is completed.
+- Choose from the available POS color themes.
 
-## 📁 Project Structure
+### Products and Inventory
 
-*   `pages/` — browser-facing PHP pages and endpoints.
-*   `includes/` — shared PHP dependencies such as the database connection.
-*   `assets/media/` — application media, including the logo and login video.
-*   `assets/team/` — developer profile images.
-*   `assets/sample-products/` — demo product images.
-*   `database/` — database schema and migration SQL files.
-*   `uploads/` — product images uploaded through the application.
-*   `index.php` — redirects to the login page in `pages/`.
+- Create products with a name, description, price, initial stock, and optional image.
+- Browse, search, filter, sort, and export inventory data.
+- Review stock levels, inventory movement, and recent inventory activity.
+- Update product details, add stock, and delete products.
+- Product creation and restocking accept only whole-number quantities greater than or equal to zero. Negative values are rejected by server-side validation as well as restricted in the forms.
+- Stock updates and their inventory-history entries are saved together.
+- Uploaded product images are stored in `uploads/`.
 
-## 🚀 Installation & Setup
+### Dashboard and Reports
 
-1.  **Server Requirements:**
-    *   PHP 7.4 or higher
-    *   MySQL Database (XAMPP/WAMP suggested)
+- View product, sales, and revenue summaries.
+- See low-stock alerts.
+- Review sales history and sales reports.
 
-2.  **Database Configuration:**
-    *   Create a database named `op_db`.
-    *   Import `database/schema.sql` into MySQL.
-    *   Configure `includes/db.php` if you have a custom database password:
-        ```php
-        $host = "localhost";
-        $user = "root";
-        $pass = ""; // Enter your MySQL password here
-        $db   = "op_db";
-        ```
+## Project Structure
 
-3.  **Run the Application:**
-    *   Place the project folder in your `htdocs` directory.
-    *   Navigate to `http://localhost/POS/` (or `http://localhost/POS/pages/index.php`).
-    *   Register a new account or login.
+```text
+POS/
+├── index.php                 # Root entry point; redirects to the login page
+├── pages/                    # Browser-facing PHP pages and endpoints
+├── includes/
+│   └── db.php                # MySQL connection
+├── assets/
+│   ├── media/                # Logo and login video
+│   ├── sample-products/      # Demo product images
+│   └── team/                 # Developer profile images
+├── database/                 # SQL schema and migration files
+└── uploads/                  # Product images uploaded by users
+```
 
-## 📝 Technologies Used
-*   **Frontend:** HTML5, CSS3, JavaScript (Vanilla)
-*   **Backend:** PHP
-*   **Database:** MySQL
+The PHP pages and endpoints live under `pages/`. Shared database configuration is in `includes/`. Files uploaded by the application continue to use paths under `uploads/`.
 
-## 📄 License
-This project is for educational/assignment purposes.
-Fueled by PURE HATRED & CAFFEINE.
+## Requirements
+
+- PHP 7.4 or later, with the MySQLi extension
+- MySQL or MariaDB
+- Apache or another PHP-enabled web server (XAMPP is suitable)
+
+## Setup
+
+1. Place the project directory in the web server's document root, such as `C:\xampp\htdocs\POS`.
+2. Create the `op_db` database and import [`database/schema.sql`](database/schema.sql) using your MySQL administration tool.
+3. Set the database host, username, password, and database name in [`includes/db.php`](includes/db.php). The defaults are `localhost`, `root`, an empty password, and `op_db`.
+4. Start Apache and MySQL, then open `http://localhost/POS/`. The root `index.php` redirects to the login page at `pages/index.php`.
+5. Register an account to sign in.
+
+## Main Pages and Endpoints
+
+- `pages/index.php` — login page
+- `pages/register.php` — account registration
+- `pages/dashboard.php` — dashboard and navigation
+- `pages/pos.php` — point of sale
+- `pages/products.php` — product management and product creation
+- `pages/inventory.php` — inventory dashboard
+- `pages/update_stock.php?id=<product_id>` — edit a product and add stock
+- `pages/sales_history.php` — sales history
+- `pages/sales_report.php` — sales report
+- `pages/get_sale_items.php` — sales-report item data endpoint
+- `pages/logout.php` — end the current session
+
+## Database Files
+
+- `database/schema.sql` — application database schema
+- `database/legacy-user-schema.sql` — legacy user-table SQL
+- `database/sales-columns-migration.sql` — SQL for adding payment and change columns to an existing sales table
+
+## Technologies
+
+- PHP, HTML, CSS, and vanilla JavaScript
+- MySQL or MariaDB
+
+## License
+
+This project is for educational and assignment purposes.
