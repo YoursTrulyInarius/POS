@@ -1,6 +1,6 @@
 <?php
 header('Content-Type: application/json');
-include "db.php";
+include "../includes/db.php";
 
 // Check if sale_id is provided
 if (!isset($_GET['sale_id']) || empty($_GET['sale_id'])) {

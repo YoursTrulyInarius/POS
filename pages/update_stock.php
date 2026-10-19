@@ -1,10 +1,28 @@
 <?php
-include "db.php";
+include "../includes/db.php";
 
 $message = "";
-$id = $_GET['id'];
-$res = $conn->query("SELECT * FROM products WHERE product_id=$id");
-$product = $res->fetch_assoc();
+$id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT, [
+    'options' => ['min_range' => 1],
+]);
+if ($id === false || $id === null) {
+    http_response_code(400);
+    exit("Invalid product ID.");
+}
+
+$stmt = $conn->prepare("SELECT * FROM products WHERE product_id = ?");
+if (!$stmt) {
+    http_response_code(500);
+    exit("Unable to load product: " . htmlspecialchars($conn->error));
+}
+$stmt->bind_param("i", $id);
+$stmt->execute();
+$product = $stmt->get_result()->fetch_assoc();
+$stmt->close();
+if (!$product) {
+    http_response_code(404);
+    exit("Product not found.");
+}
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST['update_product'])) {
@@ -25,25 +43,47 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $message = "❌ Error updating product information.";
         }
     } elseif (isset($_POST['update_stock'])) {
-        // Update stock quantity
-        $qty = intval($_POST['quantity']);
+        $qty = filter_var($_POST['quantity'] ?? null, FILTER_VALIDATE_INT, [
+            'options' => ['min_range' => 0, 'max_range' => 2147483647],
+        ]);
 
-        // Update stock in products
-        $stmt = $conn->prepare("UPDATE products SET stock = stock + ? WHERE product_id=?");
-        $stmt->bind_param("ii", $qty, $id);
-        $stmt->execute();
+        if ($qty === false) {
+            $message = "❌ Stock quantity must be a whole number zero or greater.";
+        } elseif (!$conn->begin_transaction()) {
+            $message = "❌ Unable to start stock update: " . htmlspecialchars($conn->error);
+        } else {
+            $stock_stmt = $conn->prepare("UPDATE products SET stock = stock + ? WHERE product_id = ?");
+            $inventory_stmt = $conn->prepare(
+                "INSERT INTO inventory (product_id, quantity, last_updated)
+                 VALUES (?, ?, NOW())
+                 ON DUPLICATE KEY UPDATE quantity = quantity + VALUES(quantity), last_updated = NOW()"
+            );
 
-        // Update inventory table
-        $stmt = $conn->prepare("INSERT INTO inventory (product_id, quantity, last_updated) 
-                                VALUES (?, ?, NOW())
-                                ON DUPLICATE KEY UPDATE quantity = quantity + VALUES(quantity), last_updated = NOW()");
-        $stmt->bind_param("ii", $id, $qty);
-        $stmt->execute();
+            if (!$stock_stmt || !$inventory_stmt) {
+                $message = "❌ Unable to prepare stock update: " . htmlspecialchars($conn->error);
+                $conn->rollback();
+            } else {
+                $stock_stmt->bind_param("ii", $qty, $id);
+                $inventory_stmt->bind_param("ii", $id, $qty);
 
-        $message = "✅ Stock updated successfully!";
-        // Refresh product data
-        $res = $conn->query("SELECT * FROM products WHERE product_id=$id");
-        $product = $res->fetch_assoc();
+                if (!$stock_stmt->execute()) {
+                    $message = "❌ Unable to update product stock: " . htmlspecialchars($stock_stmt->error);
+                    $conn->rollback();
+                } elseif (!$inventory_stmt->execute()) {
+                    $message = "❌ Unable to update inventory history: " . htmlspecialchars($inventory_stmt->error);
+                    $conn->rollback();
+                } elseif (!$conn->commit()) {
+                    $message = "❌ Unable to save stock update: " . htmlspecialchars($conn->error);
+                    $conn->rollback();
+                } else {
+                    $message = "✅ Stock updated successfully!";
+                    $product['stock'] += $qty;
+                }
+
+                $stock_stmt->close();
+                $inventory_stmt->close();
+            }
+        }
     }
 }
 ?>
@@ -448,16 +488,16 @@ textarea.form-control {
     <!-- Update Stock -->
     <div class="card">
         <div class="card-header">
-            <div class="card-title">📦 Update Stock Quantity</div>
-            <div class="card-subtitle">Add or remove inventory (use negative numbers to reduce stock)</div>
+            <div class="card-title">📦 Add Stock Quantity</div>
+            <div class="card-subtitle">Add inventory to the current stock</div>
         </div>
         
         <form method="post">
             <div class="form-grid">
                 <div class="form-group">
-                    <label for="quantity">Quantity to Add/Remove</label>
+                    <label for="quantity">Quantity to Add</label>
                     <input type="number" id="quantity" name="quantity" class="form-control" 
-                           placeholder="Enter positive number to add, negative to remove" required>
+                           min="0" step="1" placeholder="Enter a whole number" required>
                     <small style="color: #666; margin-top: 5px;">
                         Current stock: <strong><?= $product['stock'] ?> units</strong>
                     </small>

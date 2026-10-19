@@ -1,5 +1,5 @@
 <?php 
-include "db.php"; 
+include "../includes/db.php";
 
 // Get sales report data with additional statistics - FIXED to use correct tables
 $res = $conn->query("

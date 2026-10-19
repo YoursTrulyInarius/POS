@@ -1,5 +1,5 @@
 <?php
-include "db.php";
+include "../includes/db.php";
 
 // Fetch products with aggregated inventory data
 $res = $conn->query("

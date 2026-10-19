@@ -1,5 +1,5 @@
 <?php
-include 'db.php';
+include '../includes/db.php';
 
 $message = "";
 
@@ -59,15 +59,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['product_name'])) {
     $product_name = trim($_POST['product_name']);
     $description  = trim($_POST['description'] ?? '');
     $price_raw    = $_POST['price'] ?? '0';
-    $stock_raw    = $_POST['stock'] ?? '0';
+    $stock_raw    = $_POST['stock'] ?? null;
 
     $price = is_numeric($price_raw) ? (float)$price_raw : 0.00;
-    $stock = is_numeric($stock_raw) ? (int)$stock_raw : 0;
+    $stock = filter_var($stock_raw, FILTER_VALIDATE_INT, [
+        'options' => ['min_range' => 0, 'max_range' => 2147483647],
+    ]);
 
+    if ($stock === false) {
+        $message = "Stock quantity must be a whole number zero or greater.";
+    } else {
     // handle image upload (optional)
     $image_path = "";
     if (!empty($_FILES['image']['name'])) {
-        $targetDir = __DIR__ . DIRECTORY_SEPARATOR . "uploads";
+        $targetDir = dirname(__DIR__) . DIRECTORY_SEPARATOR . "uploads";
         if (!is_dir($targetDir)) {
             mkdir($targetDir, 0777, true);
         }
@@ -112,6 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['product_name'])) {
         } else {
             $message = "Insert failed: " . htmlspecialchars($stmt->error);
             $stmt->close();
+        }
         }
     }
 }
@@ -959,7 +965,7 @@ $stats = $conn->query("
                 </button>
             </div>
             <div class="card-body" id="addProductForm">
-                <form method="post" enctype="multipart/form-data" novalidate>
+                <form method="post" enctype="multipart/form-data">
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="product_name">Product Name *</label>
@@ -973,7 +979,7 @@ $stats = $conn->query("
                         
                         <div class="form-group">
                             <label for="stock">Stock Quantity *</label>
-                            <input type="number" id="stock" name="stock" class="form-control" placeholder="0" value="0" required>
+                            <input type="number" id="stock" name="stock" class="form-control" placeholder="0" min="0" step="1" value="0" required>
                         </div>
                         
                         <div class="form-group">
@@ -1057,8 +1063,10 @@ $stats = $conn->query("
                                 <td><strong><?= (int)$r['product_id'] ?></strong></td>
                                 <td>
                                     <?php
-                                    if (!empty($r['image']) && file_exists(__DIR__ . DIRECTORY_SEPARATOR . $r['image'])) {
-                                        echo '<img src="'.htmlspecialchars($r['image']).'" alt="Product Image" class="product-image" onclick="showImageModal(\''.htmlspecialchars($r['image']).'\', \''.htmlspecialchars($r['product_name']).'\')">';
+                                    $imagePath = !empty($r['image']) ? '../' . ltrim($r['image'], '/') : '';
+                                    $imageFile = dirname(__DIR__) . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $r['image'] ?? '');
+                                    if (!empty($r['image']) && file_exists($imageFile)) {
+                                        echo '<img src="'.htmlspecialchars($imagePath, ENT_QUOTES).'" alt="Product Image" class="product-image" onclick="showImageModal(\''.htmlspecialchars($imagePath, ENT_QUOTES).'\', \''.htmlspecialchars($r['product_name'], ENT_QUOTES).'\')">';
                                     } elseif (!empty($r['image'])) {
                                         echo '<div style="width:60px;height:60px;background:#e9ecef;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#6c757d;">No Image</div>';
                                     } else {

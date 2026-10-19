@@ -7,9 +7,7 @@ if (!isset($_SESSION['username'])) {
     exit();
 }
 
-// db connection
-$conn = new mysqli("localhost", "root", "", "op_db");
-if ($conn->connect_error) die("Connection failed: " . $conn->connect_error);
+include "../includes/db.php";
 
 // fetch products
 $products = $conn->query("SELECT * FROM products");
@@ -537,12 +535,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_data'])) {
     <div class="product-list">
       <?php while($row = $products->fetch_assoc()): ?>
         <div class="product">
-          <img src="<?= htmlspecialchars($row['image']) ?>" alt="<?= htmlspecialchars($row['product_name']) ?>">
+          <img src="<?= htmlspecialchars('../' . ltrim($row['image'] ?? '', '/'), ENT_QUOTES) ?>" alt="<?= htmlspecialchars($row['product_name']) ?>">
           <p><strong><?= htmlspecialchars($row['product_name']) ?></strong></p>
           <p>$<?= number_format($row['price'], 2) ?></p>
           <p>Stock: <?= intval($row['stock']) ?></p>
           <input type="number" id="qty-<?= $row['product_id'] ?>" min="1" max="<?= intval($row['stock']) ?>" value="1">
-          <button class="add-btn" onclick="addToCart(<?= $row['product_id'] ?>, '<?= htmlspecialchars($row['product_name'], ENT_QUOTES) ?>', <?= $row['price'] ?>, '<?= htmlspecialchars($row['image'], ENT_QUOTES) ?>', <?= intval($row['stock']) ?>)">Add</button>
+          <button class="add-btn" onclick="addToCart(<?= $row['product_id'] ?>, '<?= htmlspecialchars($row['product_name'], ENT_QUOTES) ?>', <?= $row['price'] ?>, '<?= htmlspecialchars('../' . ltrim($row['image'] ?? '', '/'), ENT_QUOTES) ?>', <?= intval($row['stock']) ?>)">Add</button>
         </div>
       <?php endwhile; ?>
     </div>

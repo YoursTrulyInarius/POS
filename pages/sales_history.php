@@ -1,5 +1,5 @@
 <?php
-include "db.php";
+include "../includes/db.php";
 
 // Determine filter
 $filter = isset($_GET['filter']) ? $_GET['filter'] : 'all';

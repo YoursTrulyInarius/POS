@@ -6,7 +6,7 @@ if (!isset($_SESSION['username'])) {
 }
 
 // Include database connection
-include_once "db.php";
+include_once "../includes/db.php";
 
 // Get low stock products (5 or less)
 $low_stock_query = "SELECT product_name, stock FROM products WHERE stock <= 5 ORDER BY stock ASC";
@@ -742,7 +742,7 @@ $total_revenue = $conn->query("SELECT COALESCE(SUM(total_amount), 0) as total FR
 
   <header>
     <div class="brand">
-      <img src="logo.png" alt="Logo">
+      <img src="../assets/media/logo.png" alt="Logo">
       <h1>CABARDO, QUENCO, DRAGON</h1>
     </div>
     <div class="header-icons">
@@ -1080,7 +1080,7 @@ $total_revenue = $conn->query("SELECT COALESCE(SUM(total_amount), 0) as total FR
         <div class="settings-section">
           <h4><i class="fa fa-users"></i> Development Team</h4>
           <div class="developer-card">
-            <img src="./phs/jeb.jpg" alt="Sonjeev C. Cabardo" class="developer-photo">
+            <img src="../assets/team/jeb.jpg" alt="Sonjeev C. Cabardo" class="developer-photo">
             <div class="developer-info">
               <div class="developer-name">Sonjeev C. Cabardo</div>
               <div class="developer-role">Team Leader & Lead Developer</div>
@@ -1091,7 +1091,7 @@ $total_revenue = $conn->query("SELECT COALESCE(SUM(total_amount), 0) as total FR
           </div>
 
           <div class="developer-card">
-            <img src="./phs/dra.jpg" alt="Marychris Dragon" class="developer-photo">
+            <img src="../assets/team/dra.jpg" alt="Marychris Dragon" class="developer-photo">
             <div class="developer-info">
               <div class="developer-name">Marychris Dragon</div>
               <div class="developer-role">Team Member</div>
@@ -1102,7 +1102,7 @@ $total_revenue = $conn->query("SELECT COALESCE(SUM(total_amount), 0) as total FR
           </div>
           
           <div class="developer-card">
-            <img src="./phs/que.jpg" alt="Rechelle Quenco" class="developer-photo">
+            <img src="../assets/team/que.jpg" alt="Rechelle Quenco" class="developer-photo">
             <div class="developer-info">
               <div class="developer-name">Rechelle Quenco</div>
               <div class="developer-role">Team Member</div>
@@ -1231,7 +1231,7 @@ $total_revenue = $conn->query("SELECT COALESCE(SUM(total_amount), 0) as total FR
       // Reset to default logo
       const logoImg = document.querySelector('header .brand img');
       if (logoImg) {
-        logoImg.src = 'logo.png';
+        logoImg.src = '../assets/media/logo.png';
       }
       
       // Clear file input

@@ -1,5 +1,5 @@
 <?php
-include 'db.php';
+include '../includes/db.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = trim($_POST['username']);
@@ -110,7 +110,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </head>
 <body>
   <video autoplay loop muted playsinline class="video-bg">
-    <source src="g5.mp4" type="video/mp4">
+    <source src="../assets/media/g5.mp4" type="video/mp4">
   </video>
   <div class="overlay"></div>
 
